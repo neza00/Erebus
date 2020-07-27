@@ -27,7 +27,7 @@ namespace VerifyTec2020
             timer1.Interval = 100;
             timer1.Start();
             sysTimer = new System.Timers.Timer();
-            sysTimer.Interval = 100;
+            sysTimer.Interval = 10;
             sysTimer.Elapsed += SysTimer_Elapsed;
             sysTimer.Start();
         }
@@ -51,6 +51,9 @@ namespace VerifyTec2020
                 }
                 if (tempret == true)
                 {
+                    tasksw.Stop();
+                    string msg = $"Task Cost: {tasksw.ElapsedMilliseconds} ms\n";
+                    LogMsgs.Add(msg);
                     NeedUpdateChart = true;
                     MulitRunning = false;
                 }
@@ -175,6 +178,8 @@ namespace VerifyTec2020
             resultState = new List<bool>();
             Result = new Dictionary<int, long>();
             long target = ThreadTarget;
+            tasksw = new Stopwatch();
+            tasksw.Start();
             for(int i = 0; i< ThreadNum; i++)
             {
                 resultState.Add(false);
@@ -198,6 +203,7 @@ namespace VerifyTec2020
         int ThreadNum = 0;
         long TotalTime = 0;
         long ThreadTarget = 0;
+        Stopwatch tasksw = new Stopwatch();
 
         private void MulitPlusCounter(object para)
         {
