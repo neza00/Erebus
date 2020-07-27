@@ -188,7 +188,9 @@ namespace VerifyTec2020
                 List<object> para = new List<object>();
                 para.Add(i);
                 para.Add(target);
+                para.Add(new AM(AfterMulit));
                 thread.Start(para);
+
             }
             numericUpDown1.Enabled = false;
             numericUpDown2.Enabled = false;
@@ -210,6 +212,11 @@ namespace VerifyTec2020
             List<object> paras = para as List<object>;
             int index = Convert.ToInt32(paras[0]);
             long target = Convert.ToInt64(paras[1]);
+            AM am = null;
+            if(paras.Count > 2)
+            {
+                am = paras[2] as AM;
+            }
             Stopwatch sw = new Stopwatch();
             string msg = string.Format("[{0}] Thread<{1}> started.\n",
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), index);
@@ -218,10 +225,14 @@ namespace VerifyTec2020
             for (long i = 0; i < target; i++) ;
             sw.Stop();
             Result[index] = sw.ElapsedMilliseconds;
+            resultState[index] = true;
+
+            am?.Invoke();
+
             msg = string.Format("[{0}] Thread<{1}> stopped.\n",
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), index);
             LogMsgs.Add(msg);
-            resultState[index] = true;
+
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
@@ -232,6 +243,23 @@ namespace VerifyTec2020
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             ThreadNum = Convert.ToInt32(numericUpDown1.Value);
+        }
+
+
+        private delegate void AM();
+        private void AfterMulit()
+        {
+            bool ret = true;
+            for(int i = 0; i< ThreadNum; i++)
+            {
+                ret &= resultState[i];
+            }
+            if(ret == true)
+            {
+                long time = tasksw.ElapsedMilliseconds;
+                string msg = string.Format("Delegate time measure: {0}ms \n", time);
+                LogMsgs.Add(msg);
+            }
         }
     }
 }
